@@ -127,6 +127,8 @@ module FFI
               else
                 # TODO better library lookup logic
                 libname = libname.to_s
+                
+                # Retain original libname on Windows, don't search in potentially unprivileged locations
                 unless libname.start_with?("/")
                   path = ['/usr/lib/','/usr/local/lib/'].find do |pth|
                     File.exist?(pth + libname)
@@ -135,7 +137,7 @@ module FFI
                     libname = path + libname
                     retry
                   end
-                end
+                end unless FFI::Platform.windows?
 
                 libr = (orig == libname ? orig : "#{orig} #{libname}")
                 errors[libr] = ex
